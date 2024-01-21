@@ -13,12 +13,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.twugteam.pritha.week1.ui.theme.Week1Theme
+import okhttp3.internal.format
 
 @Composable
 fun NumToWordsScreen(navController: NavController){
 
-    var numberText by remember { mutableStateOf(" ") }
-    var words by remember { mutableStateOf(" ") }
+    var numberText by remember {
+        mutableStateOf("")
+    }
+    var words by remember {
+        mutableStateOf("")
+    }
 
     Column(
         modifier = Modifier
@@ -45,8 +50,12 @@ fun NumToWordsScreen(navController: NavController){
         // Convert to Words button
         Button(
             onClick = {
-                words = convertToWords(numberText.toIntOrNull() ?: 0)
-
+                if (numberText.isNotEmpty()) {
+                    // Convert the number text to words
+                    words = convertToWords(numberText)
+                }else {
+                    words = "No number input"
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -60,18 +69,25 @@ fun NumToWordsScreen(navController: NavController){
         // Display words
         if (words.isNotEmpty()) {
             Text(
-                "Words: ${convertToWords(numberText.toInt())}",
+                "Words: ${convertToWords(numberText)}",
                 modifier = Modifier.padding(8.dp),
-                style = MaterialTheme.typography.displayMedium
+                style = MaterialTheme.typography.displaySmall
             )
         }
     }
 }
 
-fun convertToWords(number: Int): String {
+fun convertToWords(number: String): String {
     val units = arrayOf("", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine")
     val teens = arrayOf("", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen")
     val tens = arrayOf("", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety")
+
+    if (number.isEmpty()) {
+        return "No number input"
+    }
+
+    val number = number.toInt()
+
 
     // Base cases
     if (number == 0) {
@@ -79,30 +95,30 @@ fun convertToWords(number: Int): String {
     }
 
     if (number < 0) {
-        return "Negative " + convertToWords(-number)
+        return "Negative " + convertToWords((-number).toString())
     }
 
     var result = ""
 
     // Process millions
     if (number / 1_000_000 > 0) {
-        result += convertToWords(number / 1_000_000) + " Million "
+        result += convertToWords((number / 1_000_000).toString()) + " Million "
         val remainingNumber = number % 1_000_000
-        return result + convertToWords(remainingNumber)
+        return result + convertToWords(remainingNumber.toString())
     }
 
     // Process thousands
     if (number / 1_000 > 0) {
-        result += convertToWords(number / 1_000) + " Thousand "
+        result += convertToWords((number / 1_000).toString()) + " Thousand "
         val remainingNumber = number % 1_000
-        return result + convertToWords(remainingNumber)
+        return result + convertToWords(remainingNumber.toString())
     }
 
     // Process hundreds
     if (number / 100 > 0) {
-        result += convertToWords(number / 100) + " Hundred "
+        result += convertToWords((number / 100).toString()) + " Hundred "
         val remainingNumber = number % 100
-        return result + convertToWords(remainingNumber)
+        return result + convertToWords(remainingNumber.toString())
     }
 
     // Process tens and units
@@ -115,7 +131,7 @@ fun convertToWords(number: Int): String {
         tens[number / 10] + " " + units[number % 10]
     }
 
-    return result.trim()
+    return format(result)
 }
 
 
